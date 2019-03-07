@@ -27,7 +27,7 @@ def about():
     """Render the website's about page."""
     return render_template('about.html')
     
-@app.route('/secure-page')
+@app.route('/secure_page')
 @login_required
 def secure_page():
     """Render a secure page on our website that only logged in users can access."""
@@ -36,7 +36,13 @@ def secure_page():
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
+    if current_user.is_authenticated:
+        # if user is already logged in, just redirect them to our secure page
+        # or some other page like a dashboard
+        return redirect(url_for('secure_page'))
+        
     form = LoginForm()
+    
     if request.method == "POST" and form.validate_on_submit():
         # change this to actually validate the entire form submission
         # and not just one field
@@ -69,6 +75,14 @@ def login():
                 flash("Unsuccessful Login", "Unsuccesful")
                 
     return render_template("login.html", form=form)
+    
+@app.route("/logout")
+@login_required
+def logout():
+    # Logout the user and end the session
+    logout_user()
+    flash('You have been logged out.', 'danger')
+    return redirect(url_for('home'))
 
 
 # user_loader callback. This callback is used to reload the user object from
